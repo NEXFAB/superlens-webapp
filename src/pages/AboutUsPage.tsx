@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -12,9 +11,9 @@ const AboutUsPage = () => {
       bio: "Led Data Engineering teams at DAZN, WBD. I've seen firsthand how hard it is for business teams to get timely, actionable insights. Here, we are building SuperLens to eliminate the bottlenecks in BI with a conversational AI experience that delivers reliable, fast and context-aware narratives!"
     },
     {
-      name: "Viswa",
+      name: "Visweswarji Tanuku",
       position: "Head Of Operations",
-      bio: "John oversees all operational aspects of SuperLens, ensuring smooth delivery of our services to clients worldwide."
+      bio: "Viswa oversees all operational aspects of SuperLens, ensuring smooth delivery of our services to clients worldwide."
     },
     {
       name: "To be hired",
