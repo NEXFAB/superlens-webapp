@@ -13,7 +13,7 @@ const CTA: React.FC = () => {
             Ready to transform your decision making?
           </h2>
           <p className="text-blue-100 text-lg mb-8">
-            Start your free 14-day trial today. No credit card required.
+            Start your free 3 months trial today. No credit card required.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/book-demo">
