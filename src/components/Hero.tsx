@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import HeroTitle from './hero/HeroTitle';
 import ChatInterface from './hero/ChatInterface';
 import { queries, typingSpeed, displayDuration, transitionDuration } from './hero/HeroData';
@@ -11,6 +11,38 @@ const Hero: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [userInput, setUserInput] = useState("");
   const [isAutoTyping, setIsAutoTyping] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
+  const timeoutRefs = useRef<NodeJS.Timeout[]>([]);
+  const heroRef = useRef<HTMLElement>(null);
+  
+  // Clear all timeouts when component unmounts or when paused
+  useEffect(() => {
+    return () => {
+      timeoutRefs.current.forEach(timeout => clearTimeout(timeout));
+    };
+  }, []);
+
+  // Pause auto-cycling when user scrolls away from hero section
+  useEffect(() => {
+    const handleScroll = () => {
+      if (heroRef.current) {
+        const rect = heroRef.current.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+        
+        if (!isVisible && !isPaused) {
+          setIsPaused(true);
+          // Clear existing timeouts
+          timeoutRefs.current.forEach(timeout => clearTimeout(timeout));
+          timeoutRefs.current = [];
+        } else if (isVisible && isPaused) {
+          setIsPaused(false);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isPaused]);
   
   // Handle manual typing
   const handleUserInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,6 +53,10 @@ const Hero: React.FC = () => {
       // If auto-typing is in progress, disable it and start manual mode
       setIsAutoTyping(false);
       setTypedText(value);
+      setIsPaused(true); // Pause auto-cycling when user interacts
+      // Clear existing timeouts
+      timeoutRefs.current.forEach(timeout => clearTimeout(timeout));
+      timeoutRefs.current = [];
     } else {
       setTypedText(value);
     }
@@ -32,22 +68,22 @@ const Hero: React.FC = () => {
       setIsTyping(false);
       setShowChart(true);
       
-      // Reset after some time to continue the demo loop
-      setTimeout(() => {
+      // Reset after some time but don't continue auto cycle
+      const timeout = setTimeout(() => {
         setUserInput("");
         setTypedText("");
         setShowChart(false);
-        setIsAutoTyping(true);
-        setActiveQueryIndex((prevIndex) => (prevIndex + 1) % queries.length);
+        // Don't restart auto-typing after manual input
       }, displayDuration);
       
+      timeoutRefs.current.push(timeout);
       e.preventDefault();
     }
   };
 
   // Reset and start typing the next query in auto mode
   useEffect(() => {
-    if (!isAutoTyping) return; // Skip if manual mode is active
+    if (!isAutoTyping || isPaused) return; // Skip if manual mode is active or paused
     
     const setupNextQuery = () => {
       setTypedText("");
@@ -59,22 +95,31 @@ const Hero: React.FC = () => {
       setUserInput(""); // Don't set complete query now, we'll build it up gradually
       
       const interval = setInterval(() => {
-        if (currentIndex < currentQuery.length) {
+        if (currentIndex < currentQuery.length && !isPaused) {
           setTypedText(prev => prev + currentQuery.charAt(currentIndex));
           currentIndex++;
         } else {
           clearInterval(interval);
-          setIsTyping(false);
-          setTimeout(() => {
-            setShowChart(true);
+          if (!isPaused) {
+            setIsTyping(false);
+            const timeout1 = setTimeout(() => {
+              if (!isPaused) {
+                setShowChart(true);
+                
+                // Set timer for next query
+                const timeout2 = setTimeout(() => {
+                  if (!isPaused) {
+                    setUserInput("");
+                    setActiveQueryIndex((prevIndex) => (prevIndex + 1) % queries.length);
+                  }
+                }, displayDuration);
+                
+                timeoutRefs.current.push(timeout2);
+              }
+            }, transitionDuration);
             
-            // Set timer for next query
-            setTimeout(() => {
-              setUserInput("");
-              setActiveQueryIndex((prevIndex) => (prevIndex + 1) % queries.length);
-            }, displayDuration);
-            
-          }, transitionDuration);
+            timeoutRefs.current.push(timeout1);
+          }
         }
       }, typingSpeed);
       
@@ -82,10 +127,10 @@ const Hero: React.FC = () => {
     };
     
     setupNextQuery();
-  }, [activeQueryIndex, isAutoTyping]);
+  }, [activeQueryIndex, isAutoTyping, isPaused]);
 
   return (
-    <section className="bg-white py-10 md:py-16 relative overflow-hidden min-h-[80vh]">
+    <section ref={heroRef} className="bg-white py-10 md:py-16 relative overflow-hidden min-h-[80vh]">
       <div className="absolute inset-0 hero-gradient"></div>
       <div className="container mx-auto px-4 relative z-10">
         <div className="flex flex-col lg:flex-row gap-8 items-center min-h-[60vh]">
