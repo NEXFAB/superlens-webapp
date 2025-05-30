@@ -38,11 +38,11 @@ const TechStack: React.FC = () => {
                 aria-label={tech.name}
                 title={tech.name}
               >
-                <div className="h-17 w-auto flex items-center justify-center">
+                <div className="h-12 w-auto flex items-center justify-center">
                   <img 
                     src={tech.logo} 
                     alt={`${tech.name} logo`}
-                    className="max-h-17 max-w-[140px] object-contain"
+                    className="max-h-12 max-w-[100px] object-contain"
                   />
                 </div>
               </div>
