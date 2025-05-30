@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { ArrowRight, MessageCircle, LineChart, Zap, Users, Database } from 'lucide-react';
 import { Button } from './ui/button';
@@ -32,7 +31,7 @@ const HowSuperLensIsDifferent: React.FC = () => {
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-superlens-textBlue mb-4">HOW SUPERLENS IS DIFFERENT</h2>
           <p className="text-xl text-superlens-textBlue/80 max-w-3xl mx-auto">
-            Answer + ReAct to any question about your data - Ask questions and take action on your enterprise data!
+            Ask any question, get AI generated narrative to take action on your enterprise data
           </p>
         </div>
 
